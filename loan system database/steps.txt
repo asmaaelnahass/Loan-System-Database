@@ -1,0 +1,4 @@
+Steps to prepare the database for our schema
+1) create schema owner  (sysloan ) user by sys user
+2) create tablespaces and datafiles using sysloan user
+3) create schema tables using sysloan user

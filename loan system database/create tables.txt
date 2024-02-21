@@ -1,0 +1,156 @@
+--Addressee TABLE ---1----
+---------------------
+create table SYSLOAN.addressee( 
+aid number(10),
+name varchar2(255) not null,
+address varchar2(255) not null,
+constraint addressee_id_pk primary key (aid)
+)TABLESPACE  Main_Users PCTFREE 10 LOGGING ;
+--================================================
+
+
+--Borrower TABLE ----2-----
+---------------------
+create table SYSLOAN.borrower( 
+bid number(10),
+addresseeid number(10),
+name varchar2(255) not null,
+address varchar2(255) not null,
+constraint borrower_id_pk primary key (bid),
+CONSTRAINT addressee_id_fk FOREIGN KEY (addresseeid ) REFERENCES SYSLOAN.addressee(aid)
+)TABLESPACE Main_Users  PCTFREE 10 LOGGING ;
+--================================================
+
+--Lender TABLE -----3------
+---------------------
+create table SYSLOAN.lender( 
+lid number(10),
+addressee_id number(10),
+name varchar2(255) not null,
+address varchar2(255) not null,
+constraint lender_id_pk primary key (lid),
+CONSTRAINT addressee2_id_fk FOREIGN KEY (addressee_id ) REFERENCES SYSLOAN.addressee(aid)
+)TABLESPACE  Main_Users PCTFREE 10  LOGGING ;
+--================================================
+
+
+--Loan_requestTABLE ---4----
+---------------------
+create table SYSLOAN.loan_request( 
+lrid number(10),
+borrower_id number(10),
+datee date ,
+deadline  date not null,
+amount number(19),
+description varchar2(255),
+payday date not null ,
+constraint Loan_request_pk primary key (lrid),
+CONSTRAINT borrower_id_fk FOREIGN KEY (borrower_id) REFERENCES SYSLOAN.borrower(bid)
+)TABLESPACE request PCTFREE 10  LOGGING ;
+--================================================
+--Intermediary TABLE ----6---
+---------------------
+
+create table intermediary ( 
+iid number(10),
+addressee_id number(10),
+loanDate date,
+constraint intermediary_pk primary key (iid),
+CONSTRAINT  addressee_id_immediatry_fk  FOREIGN KEY (addressee_id ) REFERENCES SYSLOAN.addressee(aid)
+----- CONSTRAINT loan_date_intermediary_fk FOREIGN KEY (loan_date) REFERENCES loan(datee );
+)TABLESPACE  main_Users PCTFREE 10  LOGGING ;
+
+--------------------------------------------------------------------------
+
+
+ --ADD CONSTRAINT TO INTERMEDIARY TABLE--
+---------------------------------------
+ALTER TABLE intermediary add CONSTRAINT loan_date_intermediary_fk FOREIGN KEY (loanDate) REFERENCES loan(datee );
+
+
+--Loan_request_lender TABLE ---5----
+---------------------
+create table loan_request_lender ( 
+loan_request_date date,
+lender_id number(10),
+amount number(19) not null,
+loan_request_id number(10),
+constraint loan_request_date_pk PRIMARY KEY (loan_request_date, lender_id, loan_request_id),
+constraint lender_id_fk FOREIGN KEY (lender_id) REFERENCES lender(lid),
+constraint loan_request_id_fk FOREIGN KEY (loan_request_id) REFERENCES loan_request(lrid)
+)TABLESPACE  request  PCTFREE 10  LOGGING ;
+
+--================================================
+--repayment TABLE   ----8-----
+---------------------
+create table repayment ( 
+datee date,
+amount number(19) NOT NULL,
+loan_id number(10),
+constraint repayment_pk PRIMARY KEY (datee, loan_id),
+CONSTRAINT repayment_date_unique unique(datee),
+constraint loan_id_fk FOREIGN KEY (loan_id) REFERENCES loan(lid)
+)TABLESPACE loan PCTFREE 10  LOGGING ;
+--================================================
+
+--deadline TABLE ---9----
+---------------------
+create table deadline ( 
+loan_id number(10),
+agreed_date date,
+constraint deadline_pk PRIMARY KEY (agreed_date, loan_id),
+constraint loan_dead_id_fk FOREIGN KEY (loan_id) REFERENCES loan(lid),
+CONSTRAINT agreed_date_unique unique(agreed_date)
+)TABLESPACE loan PCTFREE 10  LOGGING;
+--================================================
+
+
+
+--loan TABLE ---7----
+---------------------
+create table loan ( 
+lid number(10),
+datee date,
+deadline_agreed_date date,
+repayment_date date,
+constraint loan_pk PRIMARY KEY (lid)
+--constraint date_unique unique (datee)
+--constrainit deadline_agreed_date_fk FOREIGN KEY (deadline_agreed_date) REFERENCES deadline(agreed_date),
+--constrainit repayment_date_fk FOREIGN KEY (repayment_date) REFERENCES repayment(datee),
+)TABLESPACE loan  PCTFREE 10  LOGGING ;
+--================================================
+
+--ADD CONSTRAINT TO LOAN TABLE--  --10----
+-------------------------------------
+ALTER TABLE loan add constraint date_unique unique (datee);
+ALTER TABLE loan add CONSTRAINT deadline_agreed_datee_fk FOREIGN KEY (deadline_agreed_date) REFERENCES    deadline(agreed_date);
+ALTER TABLE loan add CONSTRAINT repayment_date_fk FOREIGN KEY (repayment_date) REFERENCES repayment(datee);
+
+
+--lander_borrower TABLE ---11----
+---------------------
+create table lender_borrower ( 
+borrower_id number(10),
+lender_id number(10),
+loan_date date,
+percentage number(10),
+loan_id number(10),
+constraint lender_borrower_pk PRIMARY KEY (borrower_id, lender_id, loan_date),
+constraint borrower_lb_id_fk FOREIGN KEY (borrower_id) REFERENCES borrower(bid),
+constraint lender_lb_id_fk FOREIGN KEY (lender_id) REFERENCES lender(lid),
+constraint loan_date_fk FOREIGN KEY (loan_date) REFERENCES loan(datee),
+constraint loan_lb_id_fk FOREIGN KEY (loan_id) REFERENCES loan(lid)
+)TABLESPACE loan  PCTFREE 10  LOGGING ;
+--================================================
+
+
+
+
+
+
+
+
+
+
+
+
